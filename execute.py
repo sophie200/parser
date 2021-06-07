@@ -1,5 +1,6 @@
 import subprocess
 import argparse
+import os
 from pathlib import Path
 
 def run(args):
@@ -7,17 +8,16 @@ def run(args):
     commit2 = args.commit2
     app_dir = args.app_dir
     curr_dir = Path.cwd()
-    subprocess.Popen(["git","reset", "--hard", commit1], cwd=app_dir)
-    subprocess.Popen(["python","db1/drfields/database.py", "-d", app_dir], cwd=curr_dir)
-    subprocess.Popen(["python","db1/assoc/assoc.py", "-d", app_dir], cwd=curr_dir)
-    subprocess.Popen(["rm", "-f", ".git/index.lock"], cwd=app_dir)
-    subprocess.Popen(["git","reset", "--hard", commit2], cwd=app_dir)
-    subprocess.Popen(["python","db2/drfields/database.py", "-d", app_dir], cwd=curr_dir)
-    subprocess.Popen(["python","db2/assoc/assoc.py", "-d", app_dir], cwd=curr_dir)
-    subprocess.Popen(["python","queries/get-models.py", "-d", app_dir], cwd=curr_dir)
-    subprocess.Popen(["python","queries/queries.py", "-d", app_dir], cwd=curr_dir)
-    subprocess.Popen(["python","queries/property.py", "-d", app_dir], cwd=curr_dir)
-    subprocess.Popen(["python","compare.py"])
+    os.system("cd {} && git checkout -f {}".format(app_dir, commit1))
+    os.system("python db1/drfields/database.py -d {}".format(app_dir))
+    os.system("python db1/assoc/assoc.py -d {}".format(app_dir))
+    os.system("cd {} && git checkout -f {}".format(app_dir, commit2))
+    os.system("python db2/drfields/database.py -d {}".format(app_dir))
+    os.system("python db2/drfields/database.py -d {}".format(app_dir))
+    os.system("python queries/get-models.py -d {}".format(app_dir))
+    os.system("python queries/queries.py -d {}".format(app_dir))
+    os.system("python queries/property.py -d {}".format(app_dir))
+    os.system("python compare.py -d {}".format(app_dir))
     
 
 def main():

@@ -1,4 +1,5 @@
 import json
+import argparse
 # -- GET SCHEMA INFO: PREVIOUS DB INFO --
 
 # get added/deleted/renamed models
@@ -518,8 +519,20 @@ for dmodel in dmodels:
     logistics = holder[:holder.index("4:")]+"4:{} ".format(four)+holder[holder.index("5:"):holder.index("10:")+3]+str(ten)
     data.append(jsonconvert(dmodels[dmodel]["file"], logistics, dmodel[:dmodel.index("1:")]))
 
-with open("output.json", "w") as write_file:
-    json.dump(data, write_file)
+def run(args):
+    app_dir = args.app_dir+"output.json"
+    with open(app_dir, "w") as write_file:
+        json.dump(data, write_file)
+
+def main():
+	parser=argparse.ArgumentParser(description="schema")
+	parser.add_argument("-d",help="app_dir" ,dest="app_dir", type=str, required=True)
+	parser.set_defaults(func=run)
+	args=parser.parse_args()
+	args.func(args)
+
+if __name__=="__main__":
+	main()
 
 # -- CLEAR FILES --
 
