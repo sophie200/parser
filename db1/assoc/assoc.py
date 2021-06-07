@@ -1,5 +1,5 @@
 import ast
-import os, sys
+import argparse
 from pathlib import Path
 
 def inherit(assoc, model_name):
@@ -127,38 +127,50 @@ class VisitCall(ast.NodeVisitor):
                             print(assocs[i+1], file=f)
                             f.close()
 
-mfiles = []
-paths = Path("/Users/sophiexie/Downloads/code/dsp/posthog/").glob('**/*.py')
-for path in paths:
-    filepath = str(path)
-    if '/migrations/' in filepath:
-        mfiles.append(filepath)
+def run(args):
+    mfiles = []
+    app_dir = args.app_dir
+    paths = Path(app_dir).glob('**/*.py')
+    for path in paths:
+        filepath = str(path)
+        if '/migrations/' in filepath:
+            mfiles.append(filepath)
 
-app_mfiles = []
-all_mfiles = []
-appname = ""
-filepath_header = ""
-for i in range(len(mfiles)):
-    m = mfiles[i]
-    mpoint = m[:(m.index("/migrations"))]
-    m_appname = mpoint[::-1][:(mpoint[::-1].index("/"))][::-1]
-    m_filepath_header = mpoint[::-1][(mpoint[::-1].index("/")):][::-1]
-    if m_appname == appname and "/migrations/0" in m:
-        app_mfiles.append(m[m.index("/migrations/"):])
-    if m_appname != appname or i == (len(mfiles)-1):
-        app_mfiles.sort()
-        for sm in app_mfiles:
-            all_mfiles.append(filepath_header+appname+sm)
-        app_mfiles = []
-        appname = m_appname
-        filepath_header = m_filepath_header
-        app_mfiles.append(m[m.index("/migrations/"):])
+    app_mfiles = []
+    all_mfiles = []
+    appname = ""
+    filepath_header = ""
+    for i in range(len(mfiles)):
+        m = mfiles[i]
+        mpoint = m[:(m.index("/migrations"))]
+        m_appname = mpoint[::-1][:(mpoint[::-1].index("/"))][::-1]
+        m_filepath_header = mpoint[::-1][(mpoint[::-1].index("/")):][::-1]
+        if m_appname == appname and "/migrations/0" in m:
+            app_mfiles.append(m[m.index("/migrations/"):])
+        if m_appname != appname or i == (len(mfiles)-1):
+            app_mfiles.sort()
+            for sm in app_mfiles:
+                all_mfiles.append(filepath_header+appname+sm)
+            app_mfiles = []
+            appname = m_appname
+            filepath_header = m_filepath_header
+            app_mfiles.append(m[m.index("/migrations/"):])
 
-for m in all_mfiles:
-    #f = open("db1/assoc/assoc.txt", "a")
-    #print(m[len("/Users/sophiexie/Downloads/code/dsp/"):], file=f)
-    #f.close()
-    contents = open(m).read()
-    tree = ast.parse(contents)
-    vc = VisitCall()
-    vc.visit(tree)
+    for m in all_mfiles:
+        #f = open("db1/assoc/assoc.txt", "a")
+        #print(m[len("/Users/sophiexie/Downloads/code/dsp/"):], file=f)
+        #f.close()
+        contents = open(m).read()
+        tree = ast.parse(contents)
+        vc = VisitCall()
+        vc.visit(tree)
+
+def main():
+	parser=argparse.ArgumentParser(description="schema")
+	parser.add_argument("-d",help="app_dir" ,dest="app_dir", type=str, required=True)
+	parser.set_defaults(func=run)
+	args=parser.parse_args()
+	args.func(args)
+
+if __name__=="__main__":
+	main()

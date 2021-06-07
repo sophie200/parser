@@ -112,7 +112,8 @@ for assoc in assocs:
             drfields1[curr] = "rename field {} to {}".format(rename_rel_1, rename_rel_2)
         elif change_assoc_1 != change_assoc_2:
             drfields1[curr] = "remove field remove {}".format(curr[len(change_assoc_1)+1:])
-# AC II
+
+"""# AC II
 ac2 = 0
 for assoc in assocs:
     ars = assocs[assoc]["ar"]
@@ -122,7 +123,7 @@ for assoc in assocs:
         if curr != new and "{" not in curr and "{" not in new:
             print(ars)
             ac2+=1
-print(ac2)
+print(ac2)"""
 
 # check for del fields with somefield_id that were replaced with foreign keys
 for f in drfields1:

@@ -2,25 +2,7 @@
 
 ## commands:
 
-git reset --hard (commit before schema change)
-
-python db1/drfields/database.py
-
-python db1/drfields/assoc.py
-
-git reset --hard (commit after schema change)
-
-python db2/drfields/database.py
-
-python db2/drfields/assoc.py
-
-python queries/get-models.py
-
-python queries/queries.py
-
-python queries/property.py
-
-python compare.py
+python execute.py -c1 (commit1) -c2 (commit2) -ad (app directory)
 
 ## imports and requirements:
 

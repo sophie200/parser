@@ -1,4 +1,5 @@
 import ast
+import argparse
 from pathlib import Path
 
 class VisitAssign(ast.NodeVisitor):
@@ -119,128 +120,140 @@ class VisitCall(ast.NodeVisitor):
                 ind.close()
         b.close()
 
-mfiles = []
-paths = Path("/Users/sophiexie/Downloads/code/dsp/saleor/").glob('**/*.py')
-for path in paths:
-    filepath = str(path)
-    if '/migrations/' in filepath:
-        mfiles.append(filepath)
+def run(args):
+    mfiles = []
+    app_dir = args.app_dir
+    paths = Path(app_dir).glob('**/*.py')
+    for path in paths:
+        filepath = str(path)
+        if '/migrations/' in filepath:
+            mfiles.append(filepath)
 
-app_mfiles = []
-all_mfiles = []
-appname = ""
-filepath_header = ""
-for i in range(len(mfiles)):
-    m = mfiles[i]
-    mpoint = m[:(m.index("/migrations"))]
-    m_appname = mpoint[::-1][:(mpoint[::-1].index("/"))][::-1]
-    m_filepath_header = mpoint[::-1][(mpoint[::-1].index("/")):][::-1]
-    if m_appname == appname and "/migrations/0" in m:
-        app_mfiles.append(m[m.index("/migrations/"):])
-    if m_appname != appname or i == (len(mfiles)-1):
-        app_mfiles.sort()
-        for sm in app_mfiles:
-            all_mfiles.append(filepath_header+appname+sm)
-        all_mfiles.append("break")
-        app_mfiles = []
-        appname = m_appname
-        filepath_header = m_filepath_header
-        app_mfiles.append(m[m.index("/migrations/"):])
+    app_mfiles = []
+    all_mfiles = []
+    appname = ""
+    filepath_header = ""
+    for i in range(len(mfiles)):
+        m = mfiles[i]
+        mpoint = m[:(m.index("/migrations"))]
+        m_appname = mpoint[::-1][:(mpoint[::-1].index("/"))][::-1]
+        m_filepath_header = mpoint[::-1][(mpoint[::-1].index("/")):][::-1]
+        if m_appname == appname and "/migrations/0" in m:
+            app_mfiles.append(m[m.index("/migrations/"):])
+        if m_appname != appname or i == (len(mfiles)-1):
+            app_mfiles.sort()
+            for sm in app_mfiles:
+                all_mfiles.append(filepath_header+appname+sm)
+            all_mfiles.append("break")
+            app_mfiles = []
+            appname = m_appname
+            filepath_header = m_filepath_header
+            app_mfiles.append(m[m.index("/migrations/"):])
 
-for m in all_mfiles:
-    if m != "break":
-        contents = open(m).read()
-        tree = ast.parse(contents)
-        va = VisitAssign()
-        va.visit(tree)
-    if m == "break":
-        # database fields
-        fields = {}
-        b = open("db2/drfields/buffer.txt", "r")
-        lines = []
-        for x in b:
-            lines.append(x[:-1])
-        b.close()
-        c = 0
-        while c < len(lines)-1:
-            field = lines[c]
-            status = lines[c+1]
-            if field in fields:
-                fields[field].append(status)
-            else:
-                fields[field] = [status]
-            c+=2 
-        b = open("db2/drfields/buffer.txt", "r+")
-        b.truncate(0)
-        b.close()
-        f = open("db2/drfields/fields.txt", "a")
-        drf = open("db2/drfields/drfields.txt", "a")
-        for i in fields:
-            if fields[i][-1] == "add":
-                print(i, file=f)
-            else:
-                print(i, file=drf)
-                print(fields[i][-1], file=drf)
-        drf.close()
-        f.close()
-        # database models
-        models = {}
-        b2 = open("db2/drfields/buffer2.txt", "r")
-        lines2 = []
-        for x in b2:
-            lines2.append(x[:-1])
-        b2.close()
-        c = 0
-        while c < len(lines2)-1:
-            model = lines2[c]
-            status = lines2[c+1]
-            if model in models:
-                models[model].append(status)
-            else:
-                models[model] = [status]
-            c+=2 
-        b2 = open("db2/drfields/buffer2.txt", "r+")
-        b2.truncate(0)
-        b2.close()
-        m = open("db2/drfields/models.txt", "a")
-        drm = open("db2/drfields/drmodels.txt", "a")
-        for i in models:
-            if models[i][-1] == "add":
-                print(i, file=m)
-            else:
-                print(i, file=drm)
-                print(models[i][-1], file=drm)
-        f.close()
-        drm.close()
-        # indexes
-        indexes = {}
-        b3 = open("db2/drfields/index.txt", "r")
-        lines3 = []
-        for x in b3:
-            lines3.append(x[:-1])
-        b3.close()
-        c=0
-        while c<len(lines3)-1:
-            fi = lines3[c]
-            name = lines3[c+1]
-            if fi == "remove":
-                for inds in indexes:
-                    if indexes[inds][-1] == name:
-                        indexes[inds].append("remove")
-            elif fi in indexes:
-                indexes[fi].append(name)
-            else:
-                indexes[fi] = [name]
-            c+=2
-        b3 = open("db2/drfields/index.txt","r+")
-        b3.truncate(0)
-        b3.close()
-        f = open("db2/drfields/indexes.txt", "a")
-        for index in indexes:
-            if indexes[index][-1] != "remove":
-                print(index, file=f)
-                print("create index this query benefits from an added index", file=f)
-            else: 
-                print(index, file=f)
-                print("remove index this query no longer benefits from an added index because that index has been deleted", file=f)
-        f.close()
+    for m in all_mfiles:
+        if m != "break":
+            contents = open(m).read()
+            tree = ast.parse(contents)
+            va = VisitAssign()
+            va.visit(tree)
+        if m == "break":
+            # database fields
+            fields = {}
+            b = open("db2/drfields/buffer.txt", "r")
+            lines = []
+            for x in b:
+                lines.append(x[:-1])
+            b.close()
+            c = 0
+            while c < len(lines)-1:
+                field = lines[c]
+                status = lines[c+1]
+                if field in fields:
+                    fields[field].append(status)
+                else:
+                    fields[field] = [status]
+                c+=2 
+            b = open("db2/drfields/buffer.txt", "r+")
+            b.truncate(0)
+            b.close()
+            f = open("db2/drfields/fields.txt", "a")
+            drf = open("db2/drfields/drfields.txt", "a")
+            for i in fields:
+                if fields[i][-1] == "add":
+                    print(i, file=f)
+                else:
+                    print(i, file=drf)
+                    print(fields[i][-1], file=drf)
+            drf.close()
+            f.close()
+            # database models
+            models = {}
+            b2 = open("db2/drfields/buffer2.txt", "r")
+            lines2 = []
+            for x in b2:
+                lines2.append(x[:-1])
+            b2.close()
+            c = 0
+            while c < len(lines2)-1:
+                model = lines2[c]
+                status = lines2[c+1]
+                if model in models:
+                    models[model].append(status)
+                else:
+                    models[model] = [status]
+                c+=2 
+            b2 = open("db2/drfields/buffer2.txt", "r+")
+            b2.truncate(0)
+            b2.close()
+            m = open("db2/drfields/models.txt", "a")
+            drm = open("db2/drfields/drmodels.txt", "a")
+            for i in models:
+                if models[i][-1] == "add":
+                    print(i, file=m)
+                else:
+                    print(i, file=drm)
+                    print(models[i][-1], file=drm)
+            f.close()
+            drm.close()
+            # indexes
+            indexes = {}
+            b3 = open("db2/drfields/index.txt", "r")
+            lines3 = []
+            for x in b3:
+                lines3.append(x[:-1])
+            b3.close()
+            c=0
+            while c<len(lines3)-1:
+                fi = lines3[c]
+                name = lines3[c+1]
+                if fi == "remove":
+                    for inds in indexes:
+                        if indexes[inds][-1] == name:
+                            indexes[inds].append("remove")
+                elif fi in indexes:
+                    indexes[fi].append(name)
+                else:
+                    indexes[fi] = [name]
+                c+=2
+            b3 = open("db2/drfields/index.txt","r+")
+            b3.truncate(0)
+            b3.close()
+            f = open("db2/drfields/indexes.txt", "a")
+            for index in indexes:
+                if indexes[index][-1] != "remove":
+                    print(index, file=f)
+                    print("create index this query benefits from an added index", file=f)
+                else: 
+                    print(index, file=f)
+                    print("remove index this query no longer benefits from an added index because that index has been deleted", file=f)
+            f.close()
+
+def main():
+	parser=argparse.ArgumentParser(description="schema")
+	parser.add_argument("-d",help="app_dir" ,dest="app_dir", type=str, required=True)
+	parser.set_defaults(func=run)
+	args=parser.parse_args()
+	args.func(args)
+
+if __name__=="__main__":
+	main()

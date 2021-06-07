@@ -1,5 +1,5 @@
 import ast
-import os, glob
+import argparse
 from pathlib import Path
 
 def queries(s, li):
@@ -410,23 +410,25 @@ class VisitBinOp(ast.NodeVisitor):
                     print(cls[cl][-1], file=b)
                     b.close()
 
-paths = Path("/Users/sophiexie/Downloads/code/dsp/saleor/").glob('**/*.py')
-for path in paths:
-    if "/migrations/" not in str(path):
-        filepath = str(path)
-        contents = open(filepath).read()
-        tree = ast.parse(contents)
-        f = open("queries/query-output.txt", "a")
-        print(filepath[len("/Users/sophiexie/Downloads/code/dsp/saleor/"):], file=f)
-        f.close()
-        cq = ChainedQueries()
-        cq.visit(tree)
-        file = open("queries/var-output.txt","r+")
-        file.truncate(0)
-        file.close()
-        file = open("queries/complex-lookups.txt","r+")
-        file.truncate(0)
-        file.close()
+def run(args):
+    app_dir = args.app_dir
+    paths = Path(app_dir).glob('**/*.py')
+    for path in paths:
+        if "/migrations/" not in str(path):
+            filepath = str(path)
+            contents = open(filepath).read()
+            tree = ast.parse(contents)
+            f = open("queries/query-output.txt", "a")
+            print(filepath[len(app_dir):], file=f)
+            f.close()
+            cq = ChainedQueries()
+            cq.visit(tree)
+            file = open("queries/var-output.txt","r+")
+            file.truncate(0)
+            file.close()
+            file = open("queries/complex-lookups.txt","r+")
+            file.truncate(0)
+            file.close()
 
 """file="test.py"
 contents = open(file).read()
@@ -435,6 +437,16 @@ tree = ast.parse(contents)
 cq = ChainedQueries()
 cq.visit(tree)"""
 
+def main():
+	parser=argparse.ArgumentParser(description="schema")
+	parser.add_argument("-d",help="app_dir" ,dest="app_dir", type=str, required=True)
+	parser.set_defaults(func=run)
+	args=parser.parse_args()
+	args.func(args)
+
+if __name__=="__main__":
+	main()
+    
 # clear files
 file = open("queries/var-output.txt","r+")
 file.truncate(0)
