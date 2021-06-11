@@ -1,4 +1,13 @@
 class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
+    #entry = Entry.objects.get(pk=1)
+    #entry.authors
+    #q = entry.filter(a=a)
+    #authors = []
+    #for entry in Entry.objects.all():
+    #    authors.append(entry.authors)
+    #for entry in Entry.objects.all():
+    #    var = entry.authors
+    
     #PaymentMethod.objects.filter(user=User.objects.all(a=a))
     #payment_method, _ = PaymentMethod.objects.get_or_create(**payment_data)
     #queryset = models.PaymentMethod.objects.all()

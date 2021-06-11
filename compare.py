@@ -479,7 +479,7 @@ def jsonconvert(file_path, logistics, func):
         position["start"]["column"] = int(logistics[logistics.index("6:")+2:logistics.index("7:")-1])
         position["end"]["line"] = int(logistics[logistics.index("5:")+2:logistics.index("6:")-1])
         position["end"]["column"] = int(logistics[logistics.index("8:")+2:logistics.index("9:")-1])
-    elif func[:12] in ["remove field", "assoc change", "type change "]:
+    elif func[:12] in ["remove field", "assoc change", "changed type"]:
         position["start"]["line"] = int(logistics[logistics.index("5:")+2:logistics.index("6:")-1])
         position["start"]["column"] = int(logistics[logistics.index("6:")+2:logistics.index("7:")-1])
         position["end"]["line"] = int(logistics[logistics.index("9:")+2:logistics.index("10:")-1])
@@ -565,6 +565,8 @@ for dmodel in dmodels:
     holder = dmodels[dmodel]["lo"][0]
     logistics = holder[:holder.index("4:")]+"4:{} ".format(four)+holder[holder.index("5:"):holder.index("10:")+3]+str(ten)
     data.append(jsonconvert(dmodels[dmodel]["file"], logistics, dmodel[:dmodel.index("1:")]))
+
+print(len(data))
 
 def run(args):
     app_dir = args.app_dir+"output.json"
@@ -656,5 +658,13 @@ file.truncate(0)
 file.close()
 
 file = open("queries/binop.txt","r+")
+file.truncate(0)
+file.close()
+
+file = open("db1/type/output.txt","r+")
+file.truncate(0)
+file.close()
+
+file = open("db2/type/output.txt","r+")
 file.truncate(0)
 file.close()

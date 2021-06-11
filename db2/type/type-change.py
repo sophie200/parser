@@ -6,12 +6,12 @@ import argparse
 class VisitCall(ast.NodeVisitor):
 
     def visit_Call(self, node):
-        f = open("output.txt", "r")
+        f = open("db2/type/output.txt", "r")
         fields = []
         for x in f:
             fields.append(x[:-1])
         f.close()
-        f = open("output.txt", "a")
+        f = open("db2/type/output.txt", "a")
         func = node.func
         # Call(expr func, expr* args, keyword* keywords)
         if type(func) == ast.Attribute:
@@ -147,7 +147,7 @@ def run(args):
             vc.visit(tree)
         if m == "break":
             fields = {}
-            f = open("output.txt", "r")
+            f = open("db2/type/output.txt", "r")
             lines = []
             for x in f:
                 lines.append(x[:-1])
@@ -163,20 +163,19 @@ def run(args):
                 c+=2 
             for field in fields:
                 types = fields[field]
-                if len(types) >= 2:
+                if len(types) >= 2 and 'remove' not in [types[-2], types[-1]] and types[-1] != types[-2]:
                     tc.append(field)
-                    tc.append("type change change type {} to {}".format(types[-2], types[-1]))
-            
-            file = open("output.txt","r+")
+                    tc.append("changed type change type {} to {}".format(types[-2], types[-1]))
+            file = open("db2/type/output.txt","r+")
             file. truncate(0)
             file.close()
     
     # Clear file
-    file = open("output.txt","r+")
+    file = open("db2/type/output.txt","r+")
     file. truncate(0)
     file.close()
 
-    f = open("output.txt","a")
+    f = open("db2/type/output.txt","a")
     for t in tc:
         print(t, file=f)
     f.close()

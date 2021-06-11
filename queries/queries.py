@@ -51,6 +51,11 @@ class Queries(ast.NodeVisitor):
         for x in f:
             lst.append(x[:-1])
         f.close()
+        f = open("queries/var-output.txt","r")
+        lst2 = []
+        for x in f:
+            lst2.append(x[:-1])
+        f.close()
         file = open("queries/var-output.txt","r+")
         file.truncate(0)
         file.close()
@@ -75,6 +80,10 @@ class Queries(ast.NodeVisitor):
         m.close()
         f = open("queries/complex-lookups.txt","a")
         for i in lst:
+            print(i, file=f)
+        f.close()
+        f = open("queries/var-output.txt","a")
+        for i in lst2:
             print(i, file=f)
         f.close()
 
@@ -124,6 +133,10 @@ class Queries(ast.NodeVisitor):
             if type(node.value.value) == ast.Call:
                 que = Queries()
                 que.visit(node.value)
+        # model.fields queries
+        elif type(node.value) == ast.Attribute:
+            que = Queries()
+            que.visit(node.value)
         # get model and annotations for the chained query
         m = open("queries/model.txt", "r")
         model = []
@@ -368,6 +381,32 @@ class Queries(ast.NodeVisitor):
                 if type(arg) == ast.Call:
                     que = Queries()
                     que.visit(arg)
+        f.close()
+    
+    def visit_Attribute(self, node):
+        vs_file = open("queries/var-output.txt", "r")
+        vs_lst = []
+        for v in vs_file:
+            vs_lst.append(v[:-1])
+        vs_file.close()
+        c = 0
+        vs = {}
+        while c < len(vs_lst)-1:
+            var = vs_lst[c][3:]
+            vs[var] = {"model": vs_lst[c+1], "annotations": []}
+            j=c+2
+            while j < len(vs_lst) and "-- " not in vs_lst[j]:
+                vs[var]["annotations"].append(vs_lst[j])
+                j+=1
+            c=j
+        f = open("queries/query-output.txt", "a")
+        annotations = []
+        if type(node.value) == ast.Name and node.value.id in vs:
+            model_name = vs[node.value.id]["model"].lower()
+            for annotation in vs[node.value.id]["annotations"]:
+                annotations.append(annotation)
+            print("{} {}".format(model_name, node.attr), file=f)
+            print("1:{} 2:{} 3:* 4:{} 5:{} 6:{} 7:{} 8:{} 9:{} 10:{}".format(node.lineno-1, node.col_offset, node.end_col_offset, node.lineno-1, node.col_offset+len(node.value.id)+1, node.col_offset+len(node.value.id)+1+len(node.attr), node.col_offset+len(node.value.id)+1+len(node.attr), node.end_lineno-1, node.end_lineno-1), file=f)
         f.close()
 
 class VisitBinOp(ast.NodeVisitor):
