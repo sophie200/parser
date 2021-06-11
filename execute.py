@@ -9,7 +9,6 @@ def run(args):
     commit1 = args.commit1
     commit2 = args.commit2
     app_dir = args.app_dir
-    curr_dir = Path.cwd()
     os.system("cd {} && git checkout -f {}".format(app_dir, commit1))
     os.system("python db1/drfields/database.py -d {}".format(app_dir))
     os.system("python db1/assoc/assoc.py -d {}".format(app_dir))
