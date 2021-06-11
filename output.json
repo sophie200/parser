@@ -1,1 +1,1 @@
-[{"file": "hc/api/management/commands/sendalerts.py", "issues": [{"reason": {"type": "remove field", "detailed": "remove enabled"}, "patch": "? TODO", "position": {"start": {"line": 24, "column": 33}, "end": {"line": 24, "column": 45}}}]}, {"file": "hc/api/management/commands/sendalerts.py", "issues": [{"reason": {"type": "remove field", "detailed": "remove enabled"}, "patch": "? TODO", "position": {"start": {"line": 35, "column": 33}, "end": {"line": 35, "column": 45}}}]}]
+[]

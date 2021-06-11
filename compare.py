@@ -1,5 +1,6 @@
 import json
 import argparse
+
 # -- GET SCHEMA INFO: PREVIOUS DB INFO --
 
 # get added/deleted/renamed models
@@ -9,18 +10,18 @@ for x in f:
     lines.append(x[:-1])
 f.close()
 
-drmodels = {}
+drmodels1 = {}
 c=0
 while c < len(lines)-1:
     drmodel = lines[c]
     func = lines[c+1]
-    drmodels[drmodel] = func
+    drmodels1[drmodel] = func
     c+=2
 
 f = open("db1/drfields/models.txt", "r")
-models = []
+models1 = []
 for x in f:
-    models.append(x[:-1])
+    models1.append(x[:-1])
 f.close()
 
 # get current existing fields (queries referring to these fields are not errors)
@@ -43,7 +44,7 @@ while c < len(lines)-1:
     drfield = lines[c]
     func = lines[c+1]
     if "delete model" in func or "rename model" in func:
-        if drfield[:drfield.index(" ")] in models:
+        if drfield[:drfield.index(" ")] in models1:
             func = "remove field remove {}".format(drfield[drfield.index(" ")+1:])
     drfields1[drfield] = func
     c+=2
@@ -64,7 +65,7 @@ while c < (len(assocs_lines)):
     if a not in assocs:
         assocs[a] = {"ar": [],
                      "ih": []}
-    if a[:3] != "-- ":
+    if a[:3] != "-- " and a[:3] != "--ih ":
         c2 = c+1
         while c2 < len(assocs_lines) and (assocs_lines[c2][:3] == "-- " or assocs_lines[c2][:5] == "--ih "):
             if assocs_lines[c2][:3] == "-- ":
@@ -88,9 +89,9 @@ for assoc in assocs:
         elif "rename model" in drfields1[assoc]:
             for i in assocs[assoc]["ih"]:
                 drfields1[i] = drfields1[assoc]
-    elif a[:(a.index(" "))] in drmodels:
-        drfields1[a] = drmodels[a[:(a.index(" "))]]
-        if "delete" in drmodels[a[:(a.index(" "))]]:
+    elif a[:(a.index(" "))] in drmodels1:
+        drfields1[a] = drmodels1[a[:(a.index(" "))]]
+        if "delete" in drmodels1[a[:(a.index(" "))]]:
             for i in assocs[assoc]["ih"]:
                 drfields1[i] = "remove field remove {}".format(i[i.index(" ")+1:])
             drfields1[assoc] = "remove field remove {}".format(assoc[assoc.index(" ")+1:])
@@ -114,18 +115,6 @@ for assoc in assocs:
         elif change_assoc_1 != change_assoc_2:
             drfields1[curr] = "remove field remove {}".format(curr[len(change_assoc_1)+1:])
 
-"""# AC II
-ac2 = 0
-for assoc in assocs:
-    ars = assocs[assoc]["ar"]
-    for i in range(len(ars)-1):
-        curr = ars[i]
-        new = ars[i+1]
-        if curr != new and "{" not in curr and "{" not in new:
-            print(ars)
-            ac2+=1
-print(ac2)"""
-
 # check for del fields with somefield_id that were replaced with foreign keys
 for f in drfields1:
     model_name = f[:f.index(" ")]
@@ -134,6 +123,21 @@ for f in drfields1:
         for a in assocs:
             if "{} {}".format(model_name, field[:field.index("_")]) == a:
                 fields1.append(f)
+
+# -- GET TYPE CHANGE -- 
+f = open("db1/type/output.txt", "r")
+lines = []
+for x in f:
+    lines.append(x[:-1])
+f.close()
+
+types1 = {}
+c=0
+while c < len(lines)-1:
+    field = lines[c]
+    notation = lines[c+1]
+    types1[field] = notation
+    c+=2
 
 #--- GET INDEXES ---
 
@@ -190,18 +194,18 @@ for x in f:
     lines.append(x[:-1])
 f.close()
 
-drmodels = {}
+drmodels2 = {}
 c=0
 while c < len(lines)-1:
     drmodel = lines[c]
     func = lines[c+1]
-    drmodels[drmodel] = func
+    drmodels2[drmodel] = func
     c+=2
 
 f = open("db2/drfields/models.txt", "r")
-models = []
+models2 = []
 for x in f:
-    models.append(x[:-1])
+    models2.append(x[:-1])
 f.close()
 
 # get current existing fields (queries referring to these fields are not errors)
@@ -224,7 +228,7 @@ while c < len(lines)-1:
     drfield = lines[c]
     func = lines[c+1]
     if "delete model" in func or "rename model" in func:
-        if drfield[:drfield.index(" ")] in models:
+        if drfield[:drfield.index(" ")] in models2:
             func = "remove field remove {}".format(drfield[drfield.index(" ")+1:])
     drfields2[drfield] = func
     c+=2
@@ -269,9 +273,9 @@ for assoc in assocs:
         elif "rename model" in drfields2[assoc]:
             for i in assocs[assoc]["ih"]:
                 drfields2[i] = drfields2[assoc]
-    elif a[:(a.index(" "))] in drmodels:
-        drfields2[a] = drmodels[a[:(a.index(" "))]]
-        if "delete" in drmodels[a[:(a.index(" "))]]:
+    elif a[:(a.index(" "))] in drmodels2:
+        drfields2[a] = drmodels2[a[:(a.index(" "))]]
+        if "delete" in drmodels2[a[:(a.index(" "))]]:
             for i in assocs[assoc]["ih"]:
                 drfields2[i] = "remove field remove {}".format(i[i.index(" ")+1:])
             drfields2[assoc] = "remove field remove {}".format(assoc[assoc.index(" ")+1:])
@@ -304,6 +308,21 @@ for f in drfields2:
         for a in assocs:
             if "{} {}".format(model_name, field[:field.index("_")]) == a:
                 fields2.append(f)
+
+# -- GET TYPE CHANGE -- 
+f = open("db2/type/output.txt", "r")
+lines = []
+for x in f:
+    lines.append(x[:-1])
+f.close()
+
+types2 = {}
+c=0
+while c < len(lines)-1:
+    field = lines[c]
+    notation = lines[c+1]
+    types2[field] = notation
+    c+=2
 
 #--- GET INDEXES ---
 
@@ -359,7 +378,6 @@ for x in f:
 f.close()
 
 # -- SCHEMA DIFFERENCES BETWEEN PREVIOUS AND CURRENT VERSION OF APP --
-
 final_drfields1 = []
 for drfield in drfields1:
     if drfield not in fields1:
@@ -375,10 +393,30 @@ for drfield in final_drfields2:
     if drfield not in final_drfields1 and drfield not in property:
         final_db[drfield] = drfields2[drfield]
 
+final_drmodels1 = []
+for drmodel in drmodels1:
+    if drmodel not in models1:
+        final_drmodels1.append(drmodel)
+
+final_drmodels2 = []
+for drmodel in drmodels2:
+    if drmodel not in models2:
+        final_drmodels2.append(drmodel)
+
+final_drmodels = {}
+for drmodel in final_drmodels2:
+    if drmodel not in final_drmodels1:
+        final_drmodels[drmodel] = drmodels2[drmodel]
+
 final_assoctypes = {}
 for assoctype in assoctypes2:
     if assoctype not in assoctypes1:
         final_assoctypes[assoctype] = assoctypes2[assoctype]
+
+final_types = {}
+for type in types2:
+    if type not in types1:
+        final_types[type] = types2[type]
 
 final_indexes = {}
 for index in indexes2:
@@ -441,7 +479,7 @@ def jsonconvert(file_path, logistics, func):
         position["start"]["column"] = int(logistics[logistics.index("6:")+2:logistics.index("7:")-1])
         position["end"]["line"] = int(logistics[logistics.index("5:")+2:logistics.index("6:")-1])
         position["end"]["column"] = int(logistics[logistics.index("8:")+2:logistics.index("9:")-1])
-    elif func[:12] in ["remove field", "assoc change"]:
+    elif func[:12] in ["remove field", "assoc change", "type change "]:
         position["start"]["line"] = int(logistics[logistics.index("5:")+2:logistics.index("6:")-1])
         position["start"]["column"] = int(logistics[logistics.index("6:")+2:logistics.index("7:")-1])
         position["end"]["line"] = int(logistics[logistics.index("9:")+2:logistics.index("10:")-1])
@@ -465,7 +503,7 @@ def jsonconvert(file_path, logistics, func):
                     "type": func[:12], 
                     "detailed": func[13:]
                 },
-                "patch": "? TODO",
+                "patch": func[13:],
                 "position": position
             }
         ]
@@ -479,21 +517,25 @@ dmodels = {}
 # check if any existing queries cause errors
 for fi in files:
     for q in files[fi]:
-        if q in final_db:
+        if q in final_db or (" " not in q and q in final_drmodels):
             for lo in files[fi][q]:
-                if final_db[q][:12] == "delete model":
-                    st = final_db[q]+lo[:lo.index("3:")]
+                if " " not in q:
+                    func = final_drmodels[q]
+                else:
+                    func = final_db[q]
+                if func[:12] == "delete model":
+                    st = func+lo[:lo.index("3:")]
                     if st in dmodels:
                         dmodels[st]["lo"].append(lo)
                     else:
                         dmodels[st] = {"lo": [lo], "file": fi}
-                elif final_db[q][:12] == "rename model":
+                elif func[:12] == "rename model":
                     if "3:**" not in lo:
-                        jc = jsonconvert(fi, lo, final_db[q])
+                        jc = jsonconvert(fi, lo, func)
                         if jc not in data:
                             data.append(jc)
                 else:
-                    jc = jsonconvert(fi, lo, final_db[q])
+                    jc = jsonconvert(fi, lo, func)
                     if jc not in data:
                         data.append(jc)
         if q in final_assoctypes:
@@ -501,9 +543,14 @@ for fi in files:
                 jc = jsonconvert(fi, lo, final_assoctypes[q])
                 if jc not in data:
                     data.append(jc)
-        elif q in final_indexes:
+        if q in final_indexes:
             for lo in files[fi][q]:
                 jc = jsonconvert(fi, lo, final_indexes[q])
+                if jc not in data:
+                    data.append(jc)
+        if q in final_types:
+            for lo in files[fi][q]:
+                jc = jsonconvert(fi, lo, final_types[q])
                 if jc not in data:
                     data.append(jc)
 
@@ -535,6 +582,10 @@ if __name__=="__main__":
 	main()
 
 # -- CLEAR FILES --
+
+file = open("queries/complex-lookups.txt","r+")
+file.truncate(0)
+file.close()
 
 file = open("db1/drfields/fields.txt","r+")
 file.truncate(0)
@@ -601,5 +652,9 @@ file.truncate(0)
 file.close()
 
 file = open("queries/query-output.txt","r+")
+file.truncate(0)
+file.close()
+
+file = open("queries/binop.txt","r+")
 file.truncate(0)
 file.close()
