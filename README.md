@@ -9,3 +9,4 @@ python execute.py -c1 (commit1) -c2 (commit2) -ad (app directory)
 python version >= 3.9.4
 
 No required libraries to install.
+app directory should start and end in '/'
