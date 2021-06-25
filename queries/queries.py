@@ -260,6 +260,9 @@ class Queries(ast.NodeVisitor):
                             if type(i.value) == ast.Call:
                                 que = Queries()
                                 que.visit(i.value)
+                            if type(i.value) == ast.Attribute:
+                                que = Queries()
+                                que.visit(i.value)
                     # argument queries --> widerange
                     for i in node.args:
                         # for Q() django queries with operators

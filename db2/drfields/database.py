@@ -31,11 +31,6 @@ class VisitCall(ast.NodeVisitor):
                 print(model_name, file=m)
                 print("add", file=m)
                 m.close()
-                """# if create model that was once deleted all fields from deleted model change from delete model to remove field, this will be fixed if need to by next step with add field.
-                for field in fields:
-                    if field[:len(model_name)+1] == model_name+" ":
-                        print("{} {}".format(model_name, field[(len(model_name)+1):]), file=b)
-                        print("remove field remove {}".format(field[(len(model_name)+1):]), file=b)"""
                 tuples = keywords[1].value.elts
                 for t in tuples:
                     print("{} {}".format(model_name, t.elts[0].value.lower()), file=b)
@@ -46,57 +41,57 @@ class VisitCall(ast.NodeVisitor):
                 print("add", file=b)
             elif funcname == 'DeleteModel':
                 model_name = keywords[0].value.value.lower()
+                model_name_upper = keywords[0].value.value
                 m = open("db2/drfields/buffer2.txt", "a")
                 print(model_name, file=m)
-                print("delete model delete model {}".format(model_name), file=m)
+                print("delete model {} is deleted".format(model_name_upper), file=m)
                 m.close()
                 for field in fields:
                     if field[:len(model_name)+1] == model_name+" ":
                         print(field, file=b)
-                        print("delete model delete model {}".format(model_name), file=b)
+                        print("delete model {} is deleted".format(model_name_upper), file=b)
             elif funcname == 'RenameModel':
                 if keywords != []:
                     model_name_1 = keywords[0].value.value.lower()
+                    model_name_1_u = keywords[0].value.value
                     model_name_2 = keywords[1].value.value.lower()
+                    model_name_2_u = keywords[1].value.value
                 else:
                     model_name_1 = node.args[0].value.lower()
+                    model_name_1_u = keywords[0].value.value
                     model_name_2 = node.args[1].value.lower()
+                    model_name_2_u = keywords[1].value.value
                 m = open("db2/drfields/buffer2.txt", "a")
                 print(model_name_1, file=m)
-                print("rename model {} to {}".format(model_name_1, model_name_2), file=m)
+                print("rename model {} is renamed to {}".format(model_name_1_u, model_name_2_u), file=m)
                 print(model_name_2, file=m)
                 print("add", file=m)
                 m.close()
-                """#if create model that was once deleted all fields from deleted model change from delete model to remove field, this will be fixed if need to by next step with add field.
-                for field in fields:
-                    if field[:len(model_name_2)+1] == model_name_2+" ":
-                        print("{} {}".format(model_name_2, field[(len(model_name_2)+1):]), file=b)
-                        print("remove field remove {}".format(field[(len(model_name_2)+1):]), file=b)"""
                 for field in fields:
                     if field[:len(model_name_1)+1] == model_name_1+" ":
                         print(field, file=b)
-                        print("rename model {} to {}".format(model_name_1, model_name_2), file=b)
+                        print("rename model {} is renamed to {}".format(model_name_1_u, model_name_2_u), file=b)
                         print("{} {}".format(model_name_2, field[(len(model_name_1)+1):]), file=b)
                         print("add", file=b)
             elif funcname == 'RemoveField':
                 model_name = ""
                 for keyword in keywords:
                     if keyword.arg == "model_name":
-                        model_name = keyword.value.value.lower()
+                        model_name = keyword.value.value
                     if keyword.arg == "name":
-                        print("{} {}".format(model_name, keyword.value.value), file=b) 
-                        print("remove field remove {}".format(keyword.value.value), file=b)
+                        print("{} {}".format(model_name.lower(), keyword.value.value.lower()), file=b) 
+                        print("remove field {}.{} is deleted".format(model_name, keyword.value.value.lower()), file=b)
             elif funcname == 'RenameField':
                 if keywords != []:
-                    model_name = keywords[0].value.value.lower()
-                    print("{} {}".format(model_name, keywords[1].value.value.lower()), file=b)
-                    print("rename field {} to {}".format(keywords[1].value.value.lower(), keywords[2].value.value.lower()), file=b)
+                    model_name = keywords[0].value.value
+                    print("{} {}".format(model_name.lower(), keywords[1].value.value.lower()), file=b)
+                    print("rename field {}.{} is renamed to {}.{}".format(model_name, keywords[1].value.value.lower(), model_name, keywords[2].value.value.lower()), file=b)
                     print("{} {}".format(model_name, keywords[2].value.value.lower()), file=b)
                     print("add", file=b)
                 else:
-                    model_name = node.args[0].value.lower()
-                    print("{} {}".format(model_name, node.args[1].value.lower()), file=b)
-                    print("rename field {} to {}".format(node.args[1].value.lower(), node.args[2].value.lower()), file=b)
+                    model_name = node.args[0].value
+                    print("{} {}".format(model_name.lower(), node.args[1].value.lower()), file=b)
+                    print("rename field {}.{} is renamed to {}.{}".format(model_name, node.args[1].value.lower(), model_name, node.args[2].value.lower()), file=b)
                     print("{} {}".format(model_name, node.args[2].value.lower()), file=b)
                     print("add", file=b)
             elif funcname == 'AddIndex':
