@@ -566,10 +566,8 @@ for dmodel in dmodels:
     logistics = holder[:holder.index("4:")]+"4:{} ".format(four)+holder[holder.index("5:"):holder.index("10:")+3]+str(ten)
     data.append(jsonconvert(dmodels[dmodel]["file"], logistics, dmodel[:dmodel.index("1:")]))
 
-print(len(data))
-
 def run(args):
-    app_dir = args.app_dir+"output.json"
+    app_dir = args.app_dir+"/output.json"
     with open(app_dir, "w") as write_file:
         json.dump(data, write_file)
 
