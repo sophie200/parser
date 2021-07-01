@@ -256,7 +256,7 @@ class Queries(ast.NodeVisitor):
                                     print("1:{} 2:{} 3:{} 4:{} 5:{} 6:{} 7:{} 8:{} 9:{} 10:{}".format(node.lineno - 1, node.col_offset, three, node.end_col_offset, i.lineno-1, i.col_offset, i.col_offset+len(field), i.end_col_offset, i.end_lineno-1, node.end_lineno-1), file=f)
                             elif type(i.arg) == str and i.arg.lower() not in annotations:
                                 print("{} {}".format(model_name, i.arg.lower()), file=f)
-                                print("1:{} 2:{} 3:{} 4:{} 5:{} 6:{} 7:{} 8:{} 9:{} 10:{}".format(node.lineno - 1, node.col_offset, three, node.end_col_offset, i.lineno-1, i.col_offset, i.value.col_offset-1, i.end_col_offset, i.end_lineno-1, node.end_lineno-1), file=f)
+                                print("1:{} 2:{} 3:{} 4:{} 5:{} 6:{} 7:{} 8:{} 9:{} 10:{}".format(node.lineno - 1, node.col_offset, three, node.end_col_offset, i.lineno-1, i.col_offset, i.col_offset+len(i.arg), i.end_col_offset, i.end_lineno-1, node.end_lineno-1), file=f)
                             if type(i.value) == ast.Call:
                                 que = Queries()
                                 que.visit(i.value)

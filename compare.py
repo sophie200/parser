@@ -463,6 +463,28 @@ for fi in files:
     files[fi] = qs
 
 # -- CHECK --
+def changetype_convert(s):
+    if s == "remove field":
+        return "column delete"
+    elif s == "rename field":
+        return "column rename"
+    elif s == "rename model":
+        return "table rename"
+    else:
+        return s
+
+def patch_type(func):
+    if func[:12] == "rename field":
+        lst = func.split()
+        new_field = lst[-1]
+        ren = new_field[new_field.index(".")+1:]
+        return ren
+    elif func[:12] == "rename model":
+        lst = func.split()
+        ren = lst[-1]
+        return ren
+    else:
+        return func[13:]
 
 def jsonconvert(file_path, logistics, func):
     position = {
@@ -494,16 +516,17 @@ def jsonconvert(file_path, logistics, func):
         position["start"]["column"] = int(logistics[logistics.index("2:")+2:logistics.index("3:")-1])
         position["end"]["line"] = int(logistics[logistics.index("10:")+3:])
         position["end"]["column"] = int(logistics[logistics.index("4:")+2:logistics.index("5:")-1])
+
     dct = {
         "file": file_path,
         "issues":
         [   
             {   
                 "reason": {
-                    "type": func[:12], 
+                    "type": changetype_convert(func[:12]), 
                     "detailed": func[13:]
                 },
-                "patch": func[13:],
+                "patch": patch_type(func),
                 "position": position
             }
         ]
