@@ -486,7 +486,7 @@ def patch_type(func):
     else:
         return func[13:]
 
-def jsonconvert(file_path, logistics, func):
+def jsonconvert(logistics, func):
     position = {
                     "start": {},
                     "end": {}
@@ -517,28 +517,26 @@ def jsonconvert(file_path, logistics, func):
         position["end"]["line"] = int(logistics[logistics.index("10:")+3:])
         position["end"]["column"] = int(logistics[logistics.index("4:")+2:logistics.index("5:")-1])
 
-    dct = {
-        "file": file_path,
-        "issues":
-        [   
-            {   
-                "reason": {
-                    "type": changetype_convert(func[:12]), 
-                    "detailed": func[13:]
-                },
-                "patch": patch_type(func),
-                "position": position
-            }
-        ]
-    }
+    dct = {   
+            "reason": {
+                "type": changetype_convert(func[:12]), 
+                "detailed": func[13:]
+            },
+            "patch": patch_type(func),
+            "position": position
+          }
+
     return dct
 
 data = []
 
-dmodels = {}
-
 # check if any existing queries cause errors
 for fi in files:
+    dmodels = {}
+    fileinfo = {
+        "file": fi,
+        "issues": []
+    }
     for q in files[fi]:
         if q in final_db or (" " not in q and q in final_drmodels):
             for lo in files[fi][q]:
@@ -549,45 +547,46 @@ for fi in files:
                 if func[:12] == "delete model":
                     st = func+lo[:lo.index("3:")]
                     if st in dmodels:
-                        dmodels[st]["lo"].append(lo)
+                        dmodels[st].append(lo)
                     else:
-                        dmodels[st] = {"lo": [lo], "file": fi}
+                        dmodels[st] = [lo]
                 elif func[:12] == "rename model":
                     if "3:**" not in lo:
-                        jc = jsonconvert(fi, lo, func)
+                        jc = jsonconvert(lo, func)
                         if jc not in data:
-                            data.append(jc)
+                            fileinfo["issues"].append(jc)
                 else:
-                    jc = jsonconvert(fi, lo, func)
+                    jc = jsonconvert(lo, func)
                     if jc not in data:
-                        data.append(jc)
+                        fileinfo["issues"].append(jc)
         if q in final_assoctypes:
             for lo in files[fi][q]:
-                jc = jsonconvert(fi, lo, final_assoctypes[q])
+                jc = jsonconvert(lo, final_assoctypes[q])
                 if jc not in data:
-                    data.append(jc)
+                    fileinfo["issues"].append(jc)
         if q in final_indexes:
             for lo in files[fi][q]:
-                jc = jsonconvert(fi, lo, final_indexes[q])
+                jc = jsonconvert(lo, final_indexes[q])
                 if jc not in data:
-                    data.append(jc)
+                    fileinfo["issues"].append(jc)
         if q in final_types:
             for lo in files[fi][q]:
-                jc = jsonconvert(fi, lo, final_types[q])
+                jc = jsonconvert(lo, final_types[q])
                 if jc not in data:
-                    data.append(jc)
-
-for dmodel in dmodels:
-    endco = []
-    endline = []
-    for lo in dmodels[dmodel]["lo"]:
-        endco.append(int(lo[lo.index("4:")+2:lo.index("5:")-1]))
-        endline.append(int(lo[lo.index("10:")+3:]))
-    four = max(endco)
-    ten = max(endline)
-    holder = dmodels[dmodel]["lo"][0]
-    logistics = holder[:holder.index("4:")]+"4:{} ".format(four)+holder[holder.index("5:"):holder.index("10:")+3]+str(ten)
-    data.append(jsonconvert(dmodels[dmodel]["file"], logistics, dmodel[:dmodel.index("1:")]))
+                    fileinfo["issues"].append(jc)
+    for dmodel in dmodels:
+        endco = []
+        endline = []
+        for lo in dmodels[dmodel]:
+            endco.append(int(lo[lo.index("4:")+2:lo.index("5:")-1]))
+            endline.append(int(lo[lo.index("10:")+3:]))
+        four = max(endco)
+        ten = max(endline)
+        holder = dmodels[dmodel][0]
+        logistics = holder[:holder.index("4:")]+"4:{} ".format(four)+holder[holder.index("5:"):holder.index("10:")+3]+str(ten)
+        fileinfo["issues"].append(jsonconvert(logistics, dmodel[:dmodel.index("1:")]))
+    if len(fileinfo["issues"]) > 0:
+        data.append(fileinfo)
 
 def run(args):
     app_dir = args.app_dir+"/output.json"

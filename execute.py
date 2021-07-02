@@ -21,6 +21,7 @@ def run(args):
     os.system("python queries/queries.py -d {}".format(app_dir))
     os.system("python queries/property.py -d {}".format(app_dir))
     os.system("python compare.py -d {}".format(app_dir))
+    #os.system("git checkout main")
     #print("--- %s seconds ---" % (time.time() - start_time))
     
 

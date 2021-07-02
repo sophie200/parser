@@ -1,4 +1,5 @@
 class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
+    #Book.objects.filter(author="Bob").filter(color="red")
     #entry = Entry.objects.get(pk=1)
     #entry.authors
     #q = entry.filter(a=a)
